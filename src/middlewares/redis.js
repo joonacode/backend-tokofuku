@@ -53,5 +53,15 @@ module.exports = {
         next()
       }
     })
-  }
+  },
+  cacheAllRatings: (req, res, next) => {
+    client.get('getDetailUser', (err, data) => {
+      if (err) throw err
+      if (data) {
+        helpers.response(res, JSON.parse(data), 200, helpers.status.found, null)
+      } else {
+        next()
+      }
+    })
+  },
 }

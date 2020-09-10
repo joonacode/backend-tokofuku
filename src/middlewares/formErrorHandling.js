@@ -1,6 +1,9 @@
 const helpers = require('../helpers/helpers')
 const errorHandling = require('../helpers/errorHandling')
+const reviewModels = require('../models/review.model')
+const tokenModels = require('../models/token.model')
 const userModels = require('../models/user.model')
+const review = require('../models/review.model')
 
 
 const checkForm = {
@@ -334,41 +337,148 @@ const checkForm = {
   },
   checkChangePassword: (req, res, next) => {
     const {
-      oldPassword,
-      newPassword,
-      verifyNewPassword
+      password,
+      confirmPassword
     } = req.body
     const newCheck = [{
-        name: 'Old password',
-        value: oldPassword,
+        name: 'Password',
+        value: password,
         type: 'string',
       },
       {
-        name: 'New password',
-        value: newPassword,
+        name: 'Confirmation Password',
+        value: confirmPassword,
         type: 'string',
-      },
-      {
-        name: 'Verify new password',
-        value: verifyNewPassword,
-        type: 'string',
-      },
+      }
     ]
     errorHandling(res, newCheck, async () => {
-      if (newPassword.length < 6) {
+      if (password.length < 6) {
         return helpers.response(res, [], 400, null, null, [
           'New password min 6 character',
         ])
-      } else if (verifyNewPassword.length < 6) {
+      } else if (confirmPassword.length < 6) {
         return helpers.response(res, [], 400, null, null, [
-          'Verification new password min 6 character',
+          'Confirmation password min 6 character',
         ])
-      } else if (newPassword !== verifyNewPassword) {
+      } else if (password !== confirmPassword) {
         return helpers.response(res, [], 400, null, null, [
-          'New password not match with verification',
+          'New password not match with confirmation password',
         ])
       } else {
         next()
+      }
+    })
+  },
+  checkReqResetPassword: (req, res, next) => {
+    const {
+      email,
+    } = req.body
+
+    const newCheck = [{
+      name: 'Email',
+      value: email,
+      type: 'string',
+    }]
+
+    errorHandling(res, newCheck, async () => {
+      let isEmailExist
+      try {
+        const resEmail = await userModels.checkEmailExist(email)
+        isEmailExist = resEmail[0].totalFound
+      } catch (error) {
+        helpers.response(res, [], error.statusCode, null, null, error)
+      }
+      const checkEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+        email,
+      )
+      if (!checkEmail) {
+        return helpers.response(res, [], 400, null, null, ['Invalid email'])
+      } else if (isEmailExist < 1) {
+        return helpers.response(res, [], 400, null, null, [
+          'Email not found',
+        ])
+      } else {
+        next()
+
+      }
+    })
+  },
+  checkInsertReview: (req, res, next) => {
+    const {
+      idUser,
+      idProduct,
+      rating,
+      description
+    } = req.body
+
+    const newCheck = [{
+        name: 'User',
+        value: idUser,
+        type: 'number'
+      },
+      {
+        name: 'Product',
+        value: idProduct,
+        type: 'number'
+      },
+      {
+        name: 'Rating',
+        value: rating,
+        type: 'number'
+      },
+      {
+        name: 'Description',
+        value: description,
+        type: 'string'
+      }
+    ]
+    errorHandling(res, newCheck, () => {
+      next()
+    })
+  },
+  checkUpdateReview: (req, res, next) => {
+    const {
+      idUser,
+      idProduct,
+      rating,
+      description
+    } = req.body
+    const id = req.params.id
+
+    const newCheck = [{
+        name: 'User',
+        value: idUser,
+        type: 'number'
+      },
+      {
+        name: 'Product',
+        value: idProduct,
+        type: 'number'
+      },
+      {
+        name: 'Rating',
+        value: rating,
+        type: 'number'
+      },
+      {
+        name: 'Description',
+        value: description,
+        type: 'string'
+      }
+    ]
+    errorHandling(res, newCheck, async () => {
+      let dataReview
+      try {
+        const response = await reviewModels.getReviewById(id)
+        dataReview = response[0]
+      } catch (error) {
+        helpers.response(res, [], error.statusCode, null, null, error)
+      }
+      console.log(dataReview)
+      if (dataReview.idUser === Number(idUser) && dataReview.idProduct === Number(idProduct)) {
+        next()
+      } else {
+        return helpers.response(res, [], 403, null, null, ['You do not have access to edit this review'])
       }
     })
   }

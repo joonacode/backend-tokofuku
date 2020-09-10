@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Waktu pembuatan: 09 Sep 2020 pada 10.07
+-- Waktu pembuatan: 10 Sep 2020 pada 11.25
 -- Versi server: 10.4.11-MariaDB
 -- Versi PHP: 7.4.5
 
@@ -20,6 +20,25 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_tokoFuku`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `address`
+--
+
+CREATE TABLE `address` (
+  `id` int(11) NOT NULL,
+  `idUser` int(11) NOT NULL,
+  `home` varchar(64) NOT NULL,
+  `receiptName` varchar(64) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(64) NOT NULL,
+  `receiptPhone` varchar(32) NOT NULL,
+  `postalCode` int(11) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -78,7 +97,33 @@ INSERT INTO `products` (`id`, `name`, `price`, `idCategory`, `stock`, `color`, `
 (3, 'Baru', 90000, 3, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/d87hsrf88tg.png', 'New', '2020-09-08 16:15:13', '2020-09-08 16:15:13'),
 (4, 'Baru', 90000, 3, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/fpnr21rt7tg.png', 'New', '2020-09-08 16:15:42', '2020-09-08 16:15:42'),
 (6, 'Naon Linux', 90000, 4, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/do9vres0e98.png', 'New', '2020-09-08 16:19:00', '2020-09-08 16:23:46'),
-(7, 'BaruX', 90000, 4, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/2n5afeasad.png', 'New', '2020-09-09 02:46:39', '2020-09-09 02:46:39');
+(7, 'BaruX', 90000, 4, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/2n5afeasad.png', 'New', '2020-09-09 02:46:39', '2020-09-09 02:46:39'),
+(8, 'BaruX', 90000, 4, 5, '#fff', 'm', 'lorem', 'http://localhost:4000/uploads/11igd6cva2o.png', 'New', '2020-09-10 01:32:21', '2020-09-10 01:32:21');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `idUser` int(11) NOT NULL,
+  `idProduct` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `description` text NOT NULL,
+  `images` varchar(255) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data untuk tabel `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `idUser`, `idProduct`, `rating`, `description`, `images`, `createdAt`, `updatedAt`) VALUES
+(3, 13, 1, 1, 'asd', 'http://localhost:4000/uploads/42uh2jv1r58.png', '2020-09-10 01:00:24', '2020-09-10 01:05:37'),
+(4, 13, 1, 3, 'aokokok', 'http://localhost:4000/uploads/880udiq6jtg.png', '2020-09-10 01:00:24', '2020-09-10 01:00:24');
 
 -- --------------------------------------------------------
 
@@ -107,17 +152,9 @@ INSERT INTO `role` (`id`, `name`) VALUES
 
 CREATE TABLE `token` (
   `token` varchar(255) NOT NULL,
-  `idUser` int(11) NOT NULL
+  `idUser` int(11) NOT NULL,
+  `type` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data untuk tabel `token`
---
-
-INSERT INTO `token` (`token`, `idUser`) VALUES
-('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoxNiwiaWF0IjoxNTk5NTczMTIwLCJleHAiOjE1OTk1ODM5MjB9.2Ml-q_hMPdpUO_3v98SNuPHqcbZ_tuIWf2OkJqnVnqA', 16),
-('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoxNSwiaWF0IjoxNTk5NTY4NDMzLCJleHAiOjE1OTk1NzkyMzN9.0j8eaeNBpdvjXWKXdvkfsttxFR0UNuEu1fJznLHTnAc', 15),
-('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoxNywiaWF0IjoxNTk5NTczMTkwLCJleHAiOjE1OTk1ODM5OTB9.1hiUvz5SNNAmKRLH_HfeAHzDXWzfvBhHmj-_sdf0S5g', 17);
 
 -- --------------------------------------------------------
 
@@ -149,12 +186,19 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `storeName`, `storeDescription`, `storeImage`, `password`, `roleId`, `status`, `image`, `gender`, `dateBirth`, `createdAt`, `updatedAt`) VALUES
 (13, 'Gunxx', 'cep@gmail.com', '0099', 'Halal Store', NULL, '', '$2b$12$DgpHCdv3zxg.w/yqFnrfS.GyG85gHSKm2L8YW9QiluswrUFwf2ODa', 1, 1, 'http://localhost:4000/uploads/dhp5ffkvbgo.png', 'm', '12-12-09', '2020-09-08 12:31:32', '2020-09-08 12:31:32'),
-(14, 'Guna', 'guna@gmail.com', '69', 'Updated StoreXX', 'Asd', 'http://localhost:4000/uploads/o8nseu3oaeg.png', '$2b$12$Mj198i5q0rkTCbl12/J2mevwQOzFv2hoHAIwXCqw73PPBP2WP2z3y', 2, 1, NULL, NULL, NULL, '2020-09-08 12:32:17', '2020-09-08 15:25:47'),
-(15, 'Guna', 'cepgunawidodo@gmail.com', NULL, NULL, NULL, '', '$2b$12$UCYuwO7lZAfts7zN5yWaLOIO4ioi6ma0IwXEwpQ/jOJfjP5TvvCYq', 2, 0, NULL, NULL, NULL, '2020-09-08 12:33:53', '2020-09-08 12:33:53');
+(14, 'Guna', 'guna@gmail.com', '69', 'Updated StoreXX', 'Asd', 'http://localhost:4000/uploads/o8nseu3oaeg.png', '$2b$12$2hCsL0HJ/qfzyo6ZQIPD/uPO77C2.XvEwEYBws1t5UtN3JpS.X49u', 2, 1, NULL, NULL, NULL, '2020-09-08 12:32:17', '2020-09-08 15:25:47'),
+(18, 'Guna', 'laha@gmail.com', NULL, NULL, NULL, NULL, '$2b$12$Q1uIai9KmJWOVpsWiZM.iuKw3syoyQd5MQYir1O92Wg/TPQA.YjHG', 2, 1, NULL, NULL, NULL, '2020-09-09 11:22:16', '2020-09-09 11:22:16');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indeks untuk tabel `address`
+--
+ALTER TABLE `address`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idUser` (`idUser`);
 
 --
 -- Indeks untuk tabel `categories`
@@ -168,6 +212,14 @@ ALTER TABLE `categories`
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idCategory` (`idCategory`);
+
+--
+-- Indeks untuk tabel `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idProduct` (`idProduct`),
+  ADD KEY `idUser` (`idUser`);
 
 --
 -- Indeks untuk tabel `role`
@@ -192,6 +244,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT untuk tabel `address`
+--
+ALTER TABLE `address`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT untuk tabel `categories`
 --
 ALTER TABLE `categories`
@@ -201,7 +259,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT untuk tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT untuk tabel `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `role`
@@ -213,17 +277,30 @@ ALTER TABLE `role`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
+-- Ketidakleluasaan untuk tabel `address`
+--
+ALTER TABLE `address`
+  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `users` (`id`);
+
+--
 -- Ketidakleluasaan untuk tabel `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`idCategory`) REFERENCES `categories` (`id`);
+
+--
+-- Ketidakleluasaan untuk tabel `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`idProduct`) REFERENCES `products` (`id`),
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`idUser`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

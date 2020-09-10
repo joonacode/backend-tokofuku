@@ -12,6 +12,11 @@ const user = {
       `SELECT users.*, role.name as roleName FROM users JOIN role WHERE users.roleId = role.id AND users.id = ${id}`,
     )
   },
+  getUserByEmail: (email) => {
+    return queryHelper(
+      `SELECT * FROM users WHERE email = ?`, email,
+    )
+  },
   geAllMember: () => {
     return queryHelper(
       `SELECT id, name, email, gender, roleId, image, status, createdAt, updatedAt FROM users WHERE roleId = 3 ORDER BY name asc`,
