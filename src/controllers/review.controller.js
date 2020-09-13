@@ -4,8 +4,9 @@ const fs = require('fs')
 
 const review = {
   getAllReviews: (req, res) => {
+    const order = req.query.order || 'DESC'
     reviewModels
-      .getAllReviews()
+      .getAllReviews(order)
       .then((response) => {
         helpers.response(
           res,

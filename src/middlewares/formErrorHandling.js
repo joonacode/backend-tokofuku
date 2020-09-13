@@ -164,7 +164,7 @@ const checkForm = {
         type: 'string',
       }
     ]
-    if (roleId === '1') {
+    if (Number(roleId) === 2) {
       newCheck.push({
         name: 'Phone Number',
         value: phone,
@@ -193,7 +193,7 @@ const checkForm = {
         return helpers.response(res, [], 400, null, null, [
           'Email already exist',
         ])
-      } else if (roleId !== '1' && roleId !== '2' && roleId !== '3') {
+      } else if (Number(roleId) !== 1 && Number(roleId) !== 2 && Number(roleId) !== 3) {
         return helpers.response(res, [], 400, null, null, ['Invalid role'])
       } else if (password.length < 6) {
         return helpers.response(res, [], 400, null, null, [
@@ -381,10 +381,14 @@ const checkForm = {
     }]
 
     errorHandling(res, newCheck, async () => {
-      let isEmailExist
+      let isEmailExist = 0
+      let emailStatus
       try {
         const resEmail = await userModels.checkEmailExist(email)
+        const resStatus = await userModels.getUserByEmail(email)
         isEmailExist = resEmail[0].totalFound
+        emailStatus = resStatus[0].status
+        console.log(resStatus[0].status)
       } catch (error) {
         helpers.response(res, [], error.statusCode, null, null, error)
       }
@@ -397,6 +401,10 @@ const checkForm = {
         return helpers.response(res, [], 400, null, null, [
           'Email not found',
         ])
+      } else if (emailStatus === 0) {
+        return helpers.response(res, [], 400, null, null, [
+          'Please activate your account before resetting the password',
+        ])
       } else {
         next()
 
@@ -405,18 +413,12 @@ const checkForm = {
   },
   checkInsertReview: (req, res, next) => {
     const {
-      idUser,
       idProduct,
+      idUser,
       rating,
       description
     } = req.body
-
     const newCheck = [{
-        name: 'User',
-        value: idUser,
-        type: 'number'
-      },
-      {
         name: 'Product',
         value: idProduct,
         type: 'number'
@@ -432,8 +434,21 @@ const checkForm = {
         type: 'string'
       }
     ]
-    errorHandling(res, newCheck, () => {
-      next()
+    errorHandling(res, newCheck, async () => {
+      let isUserExist
+      try {
+        const response = await reviewModels.getReviewByIdProductAndIdUsr(idProduct, idUser)
+        isUserExist = response.length
+      } catch (error) {
+        isUserExist = 0
+      }
+      if (isUserExist >= 1) {
+        return helpers.response(res, [], 400, null, null, ['Only one product review is allowed'])
+      } else if (Number(rating) > 5) {
+        return helpers.response(res, [], 400, null, null, ['Rating range 1-5'])
+      } else {
+        next()
+      }
     })
   },
   checkUpdateReview: (req, res, next) => {
@@ -476,12 +491,184 @@ const checkForm = {
       }
       console.log(dataReview)
       if (dataReview.idUser === Number(idUser) && dataReview.idProduct === Number(idProduct)) {
-        next()
+        if (Number(rating) > 5) {
+          return helpers.response(res, [], 400, null, null, ['Rating range 1-5'])
+        } else {
+          next()
+        }
       } else {
         return helpers.response(res, [], 403, null, null, ['You do not have access to edit this review'])
       }
     })
-  }
+  },
+  checkOrder: (req, res, next) => {
+    const {
+      invoice,
+      idAddress,
+      orders,
+      purchaseAmount,
+      initialPrice,
+      priceAmount,
+      amount,
+      color,
+      size,
+      paymentMethod,
+    } = req.body
+    const newCheck = [{
+        name: 'Invoice',
+        value: invoice,
+        type: 'string'
+      },
+      {
+        name: 'Address',
+        value: idAddress,
+        type: 'number'
+      },
+      {
+        name: 'Orders',
+        value: orders,
+        type: 'string'
+      },
+      {
+        name: 'Purchase amount',
+        value: purchaseAmount,
+        type: 'string'
+      },
+      {
+        name: 'Initial price',
+        value: initialPrice,
+        type: 'string'
+      },
+      {
+        name: 'Price amount',
+        value: priceAmount,
+        type: 'string'
+      },
+      {
+        name: 'Amount',
+        value: amount,
+        type: 'number'
+      },
+      {
+        name: 'Color',
+        value: color,
+        type: 'string'
+      },
+      {
+        name: 'Size',
+        value: size,
+        type: 'string'
+      },
+      {
+        name: 'Payment Method',
+        value: paymentMethod,
+        type: 'string'
+      }
+    ]
+    errorHandling(res, newCheck, () => {
+      next()
+    })
+  },
+  checkSendInvoiceToEmail: (req, res, next) => {
+    const {
+      invoice,
+      cashier,
+      email,
+      orders,
+      purchaseAmount,
+      initialPrice,
+      priceAmount,
+      amount
+    } = req.body
+    const newCheck = [{
+        name: 'Invoice',
+        value: invoice,
+        type: 'string'
+      },
+      {
+        name: 'Cashier',
+        value: cashier,
+        type: 'string'
+      },
+      {
+        name: 'Orders',
+        value: orders,
+        type: 'string'
+      },
+      {
+        name: 'Email',
+        value: email,
+        type: 'string'
+      },
+      {
+        name: 'Amount',
+        value: amount,
+        type: 'number'
+      },
+      {
+        name: 'Purchase amount',
+        value: purchaseAmount,
+        type: 'string'
+      },
+      {
+        name: 'Initial price',
+        value: initialPrice,
+        type: 'string'
+      },
+      {
+        name: 'Price amount',
+        value: priceAmount,
+        type: 'string'
+      }
+    ]
+    errorHandling(res, newCheck, () => {
+      next()
+    })
+  },
+  checkAddress: (req, res, next) => {
+    const {
+      home,
+      receiptName,
+      address,
+      city,
+      receiptPhone,
+      postalCode
+    } = req.body
+    const newCheck = [{
+        name: 'Home',
+        value: home,
+        type: 'string',
+      },
+      {
+        name: 'Receipt Name',
+        value: receiptName,
+        type: 'string',
+      },
+      {
+        name: 'Address',
+        value: address,
+        type: 'string',
+      },
+      {
+        name: 'City',
+        value: city,
+        type: 'string',
+      },
+      {
+        name: 'Receipt Phone',
+        value: receiptPhone,
+        type: 'string',
+      },
+      {
+        name: 'Postal Code',
+        value: postalCode,
+        type: 'string',
+      },
+    ]
+    errorHandling(res, newCheck, () => {
+      next()
+    })
+  },
 
 }
 

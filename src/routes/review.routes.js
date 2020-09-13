@@ -6,8 +6,9 @@ const uploadFile = require('../middlewares/multer')
 
 const {
   verifyToken,
-  isSeller,
-  isSellerOrCostumer
+  isAdmin,
+  isASC,
+  isCostumer
 } = require('../middlewares/auth')
 const {
   checkInsertReview,
@@ -15,10 +16,10 @@ const {
 } = require('../middlewares/formErrorHandling')
 
 router
-  .get('/', verifyToken, isSeller, reviewController.getAllReviews)
-  .post('/', verifyToken, isSellerOrCostumer, uploadFile, checkInsertReview, reviewController.insertReview)
-  .patch('/:id', verifyToken, isSellerOrCostumer, uploadFile, checkUpdateReview, reviewController.updateReview)
-  .delete('/:id', verifyToken, isSellerOrCostumer, reviewController.deleteReview)
+  .get('/', verifyToken, isAdmin, reviewController.getAllReviews)
+  .post('/', verifyToken, isCostumer, uploadFile, checkInsertReview, reviewController.insertReview)
+  .patch('/:id', verifyToken, isCostumer, uploadFile, checkUpdateReview, reviewController.updateReview)
+  .delete('/:id', verifyToken, isASC, reviewController.deleteReview)
   .get('/product/:id', reviewController.getReviewByIdProduct)
   .get('/:id', reviewController.getReviewById)
 

@@ -29,13 +29,20 @@ const obj = multer({
   }
 })
 
-const upload = multer(obj).array('image', 10)
+const upload = multer(obj).array('image', 5)
 
 const uploadFileArr = (req, res, next) => {
   upload(req, res, function (error) {
     if (error) {
-      if (error.code === 'LIMIT_FILE_SIZE') return helpers.response(res, [], 400, null, null, ['Max file size 2mb'])
-      return helpers.response(res, [], 400, null, null, error)
+      console.log(error)
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return helpers.response(res, [], 400, null, null, ['Max file size 2mb'])
+      } else if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+        return helpers.response(res, [], 400, null, null, ['Max file upload 5'])
+      } else {
+
+        return helpers.response(res, [], 400, null, null, error)
+      }
     } else {
       next()
     }

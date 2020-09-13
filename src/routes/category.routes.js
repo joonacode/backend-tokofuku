@@ -3,7 +3,7 @@ const router = express.Router()
 const categoryController = require('../controllers/category.controller')
 const {
   verifyToken,
-  isSeller
+  isAdmin
 } = require('../middlewares/auth')
 const {
   cacheAllCategories
@@ -15,9 +15,9 @@ const uploadFile = require('../middlewares/multer')
 
 router
   .get('/', cacheAllCategories, categoryController.getAllCategory)
-  .post('/', verifyToken, isSeller, uploadFile, checkCategory, categoryController.insertCategory)
-  .patch('/:id', verifyToken, isSeller, uploadFile, checkCategory, categoryController.updateCategory)
-  .delete('/:id', verifyToken, isSeller, categoryController.deleteCategory)
+  .post('/', verifyToken, isAdmin, uploadFile, checkCategory, categoryController.insertCategory)
+  .patch('/:id', verifyToken, isAdmin, uploadFile, checkCategory, categoryController.updateCategory)
+  .delete('/:id', verifyToken, isAdmin, categoryController.deleteCategory)
   .get('/:id', categoryController.getCategoryById)
 
 module.exports = router

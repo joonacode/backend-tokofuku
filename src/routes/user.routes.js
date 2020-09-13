@@ -9,8 +9,9 @@ const {
 } = require('../middlewares/redis')
 const {
   verifyToken,
-  isSeller,
-  isSellerOrCostumer
+  isAdmin,
+  isAdminOrSeller,
+  isASC
 } = require('../middlewares/auth')
 const {
   checkUpdateProfile,
@@ -18,11 +19,11 @@ const {
 } = require('../middlewares/formErrorHandling')
 
 router
-  .get('/', verifyToken, isSeller, cacheAllUsers, userController.getAllUser)
-  .patch('/profile/:id', verifyToken, isSellerOrCostumer, uploadFile, checkUpdateProfile, userController.updateProfile)
-  .patch('/store/:id', verifyToken, isSeller, uploadFile, checkUpdateStore, userController.updateStore)
+  .get('/', verifyToken, isAdmin, cacheAllUsers, userController.getAllUser)
+  .patch('/profile/:id', verifyToken, isASC, uploadFile, checkUpdateProfile, userController.updateProfile)
+  .patch('/store/:id', verifyToken, isAdminOrSeller, uploadFile, checkUpdateStore, userController.updateStore)
 
-  .delete('/:id', verifyToken, isSellerOrCostumer, userController.deleteUser)
-  .get('/:id', verifyToken, isSellerOrCostumer, cacheDetailUser, userController.getUserById)
+  .delete('/:id', verifyToken, isAdmin, userController.deleteUser)
+  .get('/profile', verifyToken, isASC, cacheDetailUser, userController.getUserById)
 
 module.exports = router

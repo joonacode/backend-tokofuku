@@ -24,7 +24,7 @@ const user = {
       })
   },
   getUserById: (req, res) => {
-    const id = req.params.id
+    const id = req.userId
     userModels
       .getUserById(id)
       .then((response) => {
@@ -85,6 +85,7 @@ const user = {
         userModels
           .getUserById(id)
           .then((responseUser) => {
+            helpers.redisInstance().del('getDetailUser')
             const resultUser = responseUser[0]
             delete resultUser.password
             helpers.response(
@@ -150,10 +151,12 @@ const user = {
     userModels
       .updateUser(newUser, id)
       .then((response) => {
+
         helpers.redisInstance().del('getAllUsers')
         userModels
           .getUserById(id)
           .then((responseUser) => {
+            helpers.redisInstance().del('getDetailUser')
             const resultUser = responseUser[0]
             delete resultUser.password
             helpers.response(

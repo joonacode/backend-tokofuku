@@ -26,7 +26,7 @@ const auth = {
           roleId,
           status: 0,
         }
-        if (roleId === '1') {
+        if (Number(roleId) === 2) {
           newUser.phone = phone
           newUser.storeName = storeName
         }
@@ -78,6 +78,7 @@ const auth = {
                   helpers.response(res, [], err.statusCode, null, null, err)
                 })
             })
+
           })
           .catch((error) => {
             helpers.response(res, [], 400, null, null, error)
@@ -135,22 +136,22 @@ const auth = {
 
   verifyAccount: (req, res) => {
     const token = req.body.token
-    if (!token) return helpers.response(res, [], 400, null, null, 'No token provided')
+    if (!token) return helpers.response(res, [], 400, null, null, ['No token provided'])
     tokenModels.findToken(token).then(response => {
       const {
         token,
         idUser,
         type
       } = response[0]
-      if (type !== 1) return helpers.response(res, [], 400, null, null, 'Wrong Token')
+      if (type !== 1) return helpers.response(res, [], 400, null, null, ['Wrong Token'])
       jwt.verify(token, process.env.PRIVATE_KEY, function (err, decoded) {
         if (err) {
           if (err.name === 'JsonWebTokenError') {
-            return helpers.response(res, [], 401, null, null, 'Token invalid')
+            return helpers.response(res, [], 401, null, null, ['Token invalid'])
           } else if (err.name === 'TokenExpiredError') {
             tokenModels.deleteToken(token).then(deleteResponse => console.log('token deleted'))
             userModels.deleteUser(idUser).then(deleteUsrResponse => console.log('usr deleted'))
-            return helpers.response(res, [], 401, null, null, 'Token expired, please register again')
+            return helpers.response(res, [], 401, null, null, ['Token expired, please register again'])
           } else {
             return helpers.response(res, [], 401, null, null, err)
           }
@@ -168,7 +169,7 @@ const auth = {
         }
       })
     }).catch(err => {
-      helpers.response(res, [], 400, null, null, 'Token invalid')
+      helpers.response(res, [], 400, null, null, ['Token invalid'])
     })
   },
 
@@ -182,7 +183,7 @@ const auth = {
       .then((responseUser) => {
         const resultUser = responseUser[0]
         tokenModels.checkTokenExist(resultUser.id, 2).then((resToken) => {
-            helpers.response(res, [], 400, null, null, 'The token has been sent to your email')
+            helpers.response(res, [], 400, null, null, ['The link to change the password has been sent to your email.'])
           })
           .catch((errToken) => {
             const token = jwt.sign({
@@ -192,44 +193,45 @@ const auth = {
                 expiresIn: '1d',
               },
             )
-            // const mailinfo = {
-            //   from: 'joonacode@gmail.com',
-            //   to: email,
-            //   subject: 'Reset Password Toko Fuku',
-            //   html: `
-            //   <center>
-            //   <h1>Request to Reset Your Account Password</h1>
-            //   <p>The link below is only valid for 3 hours after this email has entered your Inbox. If you do not wish to change your account password, do not ignore this email.</p>
-            //   <br>
-            //   <a href="${process.env.BASE_URL_RESET_PASSWORD}?token=${token}" target="_blank">Reset Password</a>
-            //   </center>`,
-            // }
-            // helpers.transporter(mailinfo, () => {
+            const mailinfo = {
+              from: 'joonacode@gmail.com',
+              to: email,
+              subject: 'Reset Password Toko Fuku',
+              html: `
+              <center>
+              <h1>Request to Reset Your Account Password</h1>
+              <p>The link below is only valid for 3 hours after this email has entered your Inbox. If you do not wish to change your account password, do not ignore this email.</p>
+              <br>
+              <a href="${process.env.BASE_URL_RESET_PASSWORD}?token=${token}" target="_blank">Reset Password</a>
+              </center>`,
+            }
+            helpers.transporter(mailinfo, () => {
+              userModels
+                .getUserByEmail(email)
+                .then((responseUser) => {
+                  const resultUser = responseUser[0]
+                  delete resultUser.password
+                  tokenModels
+                    .sendToken({
+                      token,
+                      idUser: resultUser.id,
+                      type: 2
+                    })
+                    .then((resToken) => console.log(`Token send to ${email}`))
+                  helpers.response(
+                    res,
+                    [email],
+                    res.statusCode,
+                    'Token successfully sent',
+                    null,
+                  )
+                })
+                .catch((err) => {
+                  helpers.response(res, [], err.statusCode, null, null, err)
+                })
+            })
 
-            // })
-            userModels
-              .getUserByEmail(email)
-              .then((responseUser) => {
-                const resultUser = responseUser[0]
-                delete resultUser.password
-                tokenModels
-                  .sendToken({
-                    token,
-                    idUser: resultUser.id,
-                    type: 2
-                  })
-                  .then((resToken) => console.log(`Token send to ${email}`))
-                helpers.response(
-                  res,
-                  [email],
-                  res.statusCode,
-                  'Token successfully sent',
-                  null,
-                )
-              })
-              .catch((err) => {
-                helpers.response(res, [], err.statusCode, null, null, err)
-              })
+
           })
       })
       .catch((err) => {
@@ -239,21 +241,21 @@ const auth = {
 
   verifyResetPassword: (req, res) => {
     const token = req.body.token
-    if (!token) return helpers.response(res, [], 400, null, null, 'No token provided')
+    if (!token) return helpers.response(res, [], 400, null, null, ['No token provided'])
     tokenModels.findToken(token).then(response => {
       const {
         token,
         idUser,
         type
       } = response[0]
-      if (type !== 2) return helpers.response(res, [], 400, null, null, 'Wrong Token')
+      if (type !== 2) return helpers.response(res, [], 400, null, null, ['Wrong Token'])
       jwt.verify(token, process.env.PRIVATE_KEY, function (err, decoded) {
         if (err) {
           if (err.name === 'JsonWebTokenError') {
-            return helpers.response(res, [], 401, null, null, 'Token invalid')
+            return helpers.response(res, [], 401, null, null, ['Token invalid'])
           } else if (err.name === 'TokenExpiredError') {
             tokenModels.deleteToken(token).then(deleteResponse => console.log('token deleted'))
-            return helpers.response(res, [], 401, null, null, 'Token expired, please request reset password again')
+            return helpers.response(res, [], 401, null, null, ['Token expired, please request reset password again'])
           } else {
             return helpers.response(res, [], 401, null, null, err)
           }
@@ -262,7 +264,7 @@ const auth = {
         }
       })
     }).catch(err => {
-      helpers.response(res, [], 400, null, null, 'Token invalid')
+      helpers.response(res, [], 400, null, null, ['Token invalid'])
     })
   },
   resetPassword: (req, res) => {

@@ -20,26 +20,53 @@ const verifyToken = (req, res, next) => {
   })
 }
 
-const isSeller = (req, res, next) => {
+const isAdmin = (req, res, next) => {
   if (req.roleId === 1) {
     next()
     return
   }
-  return helpers.response(res, [], 403, null, null, 'Only seller can access')
+  return helpers.response(res, [], 403, null, null, 'Only admin can access')
 }
 
-const isSellerOrCostumer = (req, res, next) => {
+const isCostumer = (req, res, next) => {
+  if (req.roleId === 3) {
+    next()
+    return
+  }
+  return helpers.response(res, [], 403, null, null, 'Only costumer can access')
+}
+
+const isAdminOrSeller = (req, res, next) => {
   if (req.roleId === 2 || req.roleId === 1) {
     next()
     return
   }
-  return helpers.response(res, [], 403, null, null, 'Only seller and customer can access')
+  return helpers.response(res, [], 403, null, null, 'Only seller and admin can access')
+}
+
+const isAdminOrCostumer = (req, res, next) => {
+  if (req.roleId === 3 || req.roleId === 1) {
+    next()
+    return
+  }
+  return helpers.response(res, [], 403, null, null, 'Only customer and admin can access')
+}
+
+const isASC = (req, res, next) => {
+  if (req.roleId === 3 || req.roleId === 2 || req.roleId === 1) {
+    next()
+    return
+  }
+  return helpers.response(res, [], 403, null, null, 'Only seller, admin, and costumer can access')
 }
 
 const auth = {
   verifyToken,
-  isSeller,
-  isSellerOrCostumer
+  isAdmin,
+  isAdminOrSeller,
+  isASC,
+  isCostumer,
+  isAdminOrCostumer
 }
 
 module.exports = auth

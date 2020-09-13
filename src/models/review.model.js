@@ -2,14 +2,18 @@ const connection = require('../config/db.config')
 const queryHelper = require('../helpers/query')
 
 const review = {
-  getAllReviews: () => {
-    return queryHelper('SELECT * FROM reviews ')
+  getAllReviews: (order) => {
+    console.log(order)
+    return queryHelper(`SELECT * FROM reviews ORDER BY id ${order}`)
   },
   getReviewById: (id) => {
     return queryHelper('SELECT * FROM reviews WHERE id = ?', id)
   },
   getReviewByIdProduct: (id) => {
     return queryHelper('SELECT * FROM reviews WHERE idProduct = ?', id)
+  },
+  getReviewByIdProductAndIdUsr: (idProduct, idUser) => {
+    return queryHelper('SELECT * FROM reviews WHERE idProduct = ? AND idUser = ?', [idProduct, idUser])
   },
   insertReview: (data) => {
     return queryHelper('INSERT INTO reviews SET ?', data)
